@@ -1,6 +1,7 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useNotifications } from '../context/NotificationContext';
+import NotificationDropdown from './NotificationDropdown';
 
 const Layout = () => {
   const { user, logout } = useAuth();
@@ -60,20 +61,34 @@ const Layout = () => {
                 >
                   Services
                 </Link>
+                {user?.role === 'Admin' && (
+                  <Link
+                    to="/admin"
+                    className={`${
+                      isActive('/admin')
+                        ? 'border-blue-500 text-gray-900'
+                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
+                    } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`}
+                  >
+                    Admin
+                  </Link>
+                )}
               </div>
             </div>
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <span className="text-sm text-gray-700 mr-4">
-                  {user?.fullName} ({user?.role})
-                </span>
-                <button
-                  onClick={handleLogout}
-                  className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                >
-                  Logout
-                </button>
-              </div>
+            <div className="flex items-center space-x-4">
+              <NotificationDropdown />
+              <Link
+                to="/profile"
+                className="text-sm text-gray-700 hover:text-gray-900"
+              >
+                {user?.fullName}
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+              >
+                Logout
+              </button>
             </div>
           </div>
         </div>

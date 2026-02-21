@@ -8,6 +8,8 @@ import IncidentsPage from './pages/IncidentsPage';
 import IncidentDetailsPage from './pages/IncidentDetailsPage';
 import CreateIncidentPage from './pages/CreateIncidentPage';
 import ServicesPage from './pages/ServicesPage';
+import ProfilePage from './pages/ProfilePage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 
@@ -26,6 +28,8 @@ function App() {
               <Route path="/incidents/new" element={<CreateIncidentPage />} />
               <Route path="/incidents/:id" element={<IncidentDetailsPage />} />
               <Route path="/services" element={<ServicesPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/admin" element={<AdminDashboardPage />} />
             </Route>
 
             <Route path="/" element={<Navigate to="/dashboard" replace />} />

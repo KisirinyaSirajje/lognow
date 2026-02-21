@@ -157,3 +157,23 @@ export interface Dashboard {
   recentIncidents: Incident[];
   slaBreaches: number;
 }
+
+export interface Notification {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: string;
+  relatedEntityId?: string;
+  isRead: boolean;
+  createdAt: string;
+}
+
+export interface AdminStats {
+  totalUsers: number;
+  activeUsers: number;
+  totalIncidents: number;
+  totalServices: number;
+  usersByRole: Record<string, number>;
+  incidentsByStatus: Record<string, number>;
+}

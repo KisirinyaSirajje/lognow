@@ -15,6 +15,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<IncidentComment> IncidentComments { get; set; }
     public DbSet<IncidentTimeline> IncidentTimelines { get; set; }
     public DbSet<SLA> SLAs { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -104,6 +105,18 @@ public class ApplicationDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Severity).HasConversion<string>();
             entity.HasIndex(e => e.Severity).IsUnique();
+        });
+
+        // Notification configuration
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Type).HasConversion<string>();
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(e => new { e.UserId, e.IsRead });
         });
 
         // Seed default SLAs

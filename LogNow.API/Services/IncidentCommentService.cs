@@ -8,13 +8,19 @@ public class IncidentCommentService : IIncidentCommentService
 {
     private readonly IIncidentCommentRepository _commentRepository;
     private readonly IIncidentTimelineService _timelineService;
+    private readonly IIncidentRepository _incidentRepository;
+    private readonly INotificationService _notificationService;
 
     public IncidentCommentService(
         IIncidentCommentRepository commentRepository,
-        IIncidentTimelineService timelineService)
+        IIncidentTimelineService timelineService,
+        IIncidentRepository incidentRepository,
+        INotificationService notificationService)
     {
         _commentRepository = commentRepository;
         _timelineService = timelineService;
+        _incidentRepository = incidentRepository;
+        _notificationService = notificationService;
     }
 
     public async Task<IEnumerable<IncidentCommentDto>> GetCommentsByIncidentIdAsync(Guid incidentId)
@@ -43,6 +49,36 @@ public class IncidentCommentService : IIncidentCommentService
             "Comment added",
             userId
         );
+
+        // Get incident to notify relevant users
+        var incident = await _incidentRepository.GetByIdAsync(incidentId);
+        if (incident != null)
+        {
+            // Notify assigned user
+            if (incident.AssignedToUserId.HasValue && incident.AssignedToUserId.Value != userId)
+            {
+                await _notificationService.CreateNotificationAsync(
+                    incident.AssignedToUserId.Value,
+                    "New Comment",
+                    $"New comment added to incident {incident.IncidentNumber}",
+                    NotificationType.CommentAdded,
+                    incident.Id.ToString()
+                );
+            }
+
+            // Notify creator if different from commenter and assigned user
+            if (incident.CreatedByUserId != userId && 
+                incident.CreatedByUserId != incident.AssignedToUserId)
+            {
+                await _notificationService.CreateNotificationAsync(
+                    incident.CreatedByUserId,
+                    "New Comment",
+                    $"New comment added to incident {incident.IncidentNumber}",
+                    NotificationType.CommentAdded,
+                    incident.Id.ToString()
+                );
+            }
+        }
 
         return MapToCommentDto(createdComment);
     }

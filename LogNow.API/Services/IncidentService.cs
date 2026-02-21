@@ -10,17 +10,20 @@ public class IncidentService : IIncidentService
     private readonly IIncidentTimelineService _timelineService;
     private readonly IServiceRepository _serviceRepository;
     private readonly IUserRepository _userRepository;
+    private readonly INotificationService _notificationService;
 
     public IncidentService(
         IIncidentRepository incidentRepository,
         IIncidentTimelineService timelineService,
         IServiceRepository serviceRepository,
-        IUserRepository userRepository)
+        IUserRepository userRepository,
+        INotificationService notificationService)
     {
         _incidentRepository = incidentRepository;
         _timelineService = timelineService;
         _serviceRepository = serviceRepository;
         _userRepository = userRepository;
+        _notificationService = notificationService;
     }
 
     public async Task<IEnumerable<IncidentDto>> GetAllIncidentsAsync()
@@ -202,6 +205,18 @@ public class IncidentService : IIncidentService
             );
         }
 
+        // Create notification for assigned user
+        if (assignIncidentDto.UserId.HasValue && assignIncidentDto.UserId.Value != userId)
+        {
+            await _notificationService.CreateNotificationAsync(
+                assignIncidentDto.UserId.Value,
+                "Incident Assigned",
+                $"Incident {incident.IncidentNumber} ({incident.Title}) has been assigned to you",
+                NotificationType.IncidentAssigned,
+                incident.Id.ToString()
+            );
+        }
+
         // Reload to get updated navigation properties
         incident = await _incidentRepository.GetByIdAsync(id);
         return MapToIncidentDto(incident!);
@@ -268,6 +283,31 @@ public class IncidentService : IIncidentService
             $"Status changed from {oldStatus} to {newStatus}",
             userId
         );
+
+        // Notify assigned user about status change (if not the one making change)
+        if (incident.AssignedToUserId.HasValue && incident.AssignedToUserId.Value != userId)
+        {
+            await _notificationService.CreateNotificationAsync(
+                incident.AssignedToUserId.Value,
+                "Incident Status Changed",
+                $"Incident {incident.IncidentNumber} status changed from {oldStatus} to {newStatus}",
+                NotificationType.IncidentStatusChanged,
+                incident.Id.ToString()
+            );
+        }
+
+        // Also notify creator if different from both assigned user and person making change
+        if (incident.CreatedByUserId != userId && 
+            incident.CreatedByUserId != incident.AssignedToUserId)
+        {
+            await _notificationService.CreateNotificationAsync(
+                incident.CreatedByUserId,
+                "Incident Status Changed",
+                $"Incident {incident.IncidentNumber} status changed from {oldStatus} to {newStatus}",
+                NotificationType.IncidentStatusChanged,
+                incident.Id.ToString()
+            );
+        }
 
         return MapToIncidentDto(incident);
     }

@@ -80,6 +80,7 @@ builder.Services.AddScoped<IServiceRepository, ServiceRepository>();
 builder.Services.AddScoped<IIncidentRepository, IncidentRepository>();
 builder.Services.AddScoped<IIncidentCommentRepository, IncidentCommentRepository>();
 builder.Services.AddScoped<IIncidentTimelineRepository, IncidentTimelineRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
 // Services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -88,6 +89,7 @@ builder.Services.AddScoped<IIncidentService, IncidentService>();
 builder.Services.AddScoped<IIncidentCommentService, IncidentCommentService>();
 builder.Services.AddScoped<IIncidentTimelineService, IncidentTimelineService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<DataSeedService>();
 
 var app = builder.Build();
