@@ -13,6 +13,8 @@ public class Incident
     public Severity Severity { get; set; }
     public IncidentStatus Status { get; set; } = IncidentStatus.Pending;
     
+    public string? AssignedGroup { get; set; }
+    
     public Guid? AssignedToUserId { get; set; }
     public User? AssignedToUser { get; set; }
     

@@ -10,6 +10,7 @@ public class IncidentDto
     public string ServiceName { get; set; } = string.Empty;
     public string Severity { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
+    public string? AssignedGroup { get; set; }
     public Guid? AssignedToUserId { get; set; }
     public string? AssignedToUserName { get; set; }
     public Guid? AssignedByUserId { get; set; }
@@ -41,12 +42,14 @@ public class UpdateIncidentDto
     public string? Description { get; set; }
     public string? Severity { get; set; }
     public string? Status { get; set; }
+    public string? AssignedGroup { get; set; }
     public Guid? AssignedToUserId { get; set; }
 }
 
 public class AssignIncidentDto
 {
-    public Guid UserId { get; set; }
+    public string? AssignedGroup { get; set; }
+    public Guid? UserId { get; set; }
 }
 
 public class UpdateIncidentStatusDto

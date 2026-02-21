@@ -48,7 +48,7 @@ const DashboardPage = () => {
 
         <div className="bg-white overflow-hidden shadow rounded-lg">
           <div className="px-4 py-5 sm:p-6">
-            <dt className="text-sm font-medium text-gray-500 truncate">Open Incidents</dt>
+            <dt className="text-sm font-medium text-gray-500 truncate">Pending Incidents</dt>
             <dd className="mt-1 text-3xl font-semibold text-red-600">{dashboard.openIncidents}</dd>
           </div>
         </div>
@@ -174,9 +174,11 @@ const DashboardPage = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      incident.status === 'Open' ? 'bg-red-100 text-red-800' :
+                      incident.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
                       incident.status === 'Assigned' || incident.status === 'InProgress' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-green-100 text-green-800'
+                      incident.status === 'OnHold' ? 'bg-purple-100 text-purple-800' :
+                      incident.status === 'Resolved' ? 'bg-green-100 text-green-800' :
+                      'bg-red-100 text-red-800'
                     }`}>
                       {incident.status}
                     </span>

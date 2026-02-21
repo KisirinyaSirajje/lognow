@@ -2,24 +2,34 @@ import { useState, useEffect, FormEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { incidentService } from '../services/incidentService';
 import { commentService } from '../services/commentService';
-import { Incident, IncidentComment, IncidentStatus } from '../types';
-import { useAuth } from '../context/AuthContext';
+import { userService } from '../services/userService';
+import { Incident, IncidentComment, IncidentStatus, User } from '../types';
 import { signalRService } from '../services/signalRService';
 
 const IncidentDetailsPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [incident, setIncident] = useState<Incident | null>(null);
   const [comments, setComments] = useState<IncidentComment[]>([]);
   const [newComment, setNewComment] = useState('');
   const [loading, setLoading] = useState(true);
   const [submittingComment, setSubmittingComment] = useState(false);
+  const [showResolveModal, setShowResolveModal] = useState(false);
+  const [showHoldModal, setShowHoldModal] = useState(false);
+  const [resolutionNote, setResolutionNote] = useState('');
+  const [holdReason, setHoldReason] = useState('');
+  const [pendingStatus, setPendingStatus] = useState('');
+  const [teams, setTeams] = useState<string[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<string>('');
+  const [groupUsers, setGroupUsers] = useState<User[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState<string>('');
+  const [assigning, setAssigning] = useState(false);
 
   useEffect(() => {
     if (id) {
       loadIncident();
       loadComments();
+      loadTeams();
 
       // Setup SignalR listeners for real-time updates
       signalRService.on('IncidentUpdated', handleIncidentUpdate);
@@ -31,6 +41,15 @@ const IncidentDetailsPage = () => {
       };
     }
   }, [id]);
+
+  useEffect(() => {
+    if (selectedGroup) {
+      loadGroupUsers();
+    } else {
+      setGroupUsers([]);
+      setSelectedUserId('');
+    }
+  }, [selectedGroup]);
 
   const handleIncidentUpdate = (updatedIncident: Incident) => {
     if (updatedIncident.id === id) {
@@ -63,13 +82,112 @@ const IncidentDetailsPage = () => {
       console.error('Failed to load comments:', error);
     }
   };
-
-  const handleStatusChange = async (newStatus: string) => {
+  const loadTeams = async () => {
     try {
-      const updated = await incidentService.updateStatus(id!, newStatus);
+      const data = await userService.getAllTeams();
+      setTeams(data);
+    } catch (error) {
+      console.error('Error loading teams:', error);
+    }
+  };
+
+  const loadGroupUsers = async () => {
+    try {
+      const data = await userService.getByTeam(selectedGroup);
+      setGroupUsers(data);
+    } catch (error) {
+      console.error('Error loading users:', error);
+      setGroupUsers([]);
+    }
+  };
+  const handleStatusChange = async (newStatus: string) => {
+    // Check if the status requires additional information
+    if (newStatus === IncidentStatus.OnHold) {
+      setPendingStatus(newStatus);
+      setShowHoldModal(true);
+      return;
+    }
+    
+    if (newStatus === IncidentStatus.Resolved || newStatus === IncidentStatus.Cancelled) {
+      setPendingStatus(newStatus);
+      setShowResolveModal(true);
+      return;
+    }
+
+    // For other statuses, update directly
+    try {
+      const updated = await incidentService.updateStatus(id!, { status: newStatus });
       setIncident(updated);
     } catch (error) {
       console.error('Failed to update status:', error);
+      alert('Failed to update status. Please try again.');
+    }
+  };
+
+  const handleResolveSubmit = async () => {
+    if (!resolutionNote.trim()) {
+      alert('Resolution note is required');
+      return;
+    }
+
+    try {
+      const updated = await incidentService.updateStatus(id!, {
+        status: pendingStatus,
+        resolutionNote: resolutionNote,
+      });
+      setIncident(updated);
+      setShowResolveModal(false);
+      setResolutionNote('');
+      setPendingStatus('');
+    } catch (error: any) {
+      console.error('Failed to update status:', error);
+      alert(error.response?.data?.message || 'Failed to update status. Please try again.');
+    }
+  };
+
+  const handleHoldSubmit = async () => {
+    if (!holdReason.trim()) {
+      alert('On hold reason is required');
+      return;
+    }
+
+    try {
+      const updated = await incidentService.updateStatus(id!, {
+        status: pendingStatus,
+        onHoldReason: holdReason,
+      });
+      setIncident(updated);
+      setShowHoldModal(false);
+      setHoldReason('');
+      setPendingStatus('');
+    } catch (error: any) {
+      console.error('Failed to update status:', error);
+      alert(error.response?.data?.message || 'Failed to update status. Please try again.');
+    }
+  };
+
+  const handleAssignment = async () => {
+    if (!selectedGroup) {
+      alert('Please select a group');
+      return;
+    }
+
+    setAssigning(true);
+    try {
+      const updated = await incidentService.assign(incident!.id, {
+        assignedGroup: selectedGroup,
+        userId: selectedUserId || undefined,
+      });
+      setIncident(updated);
+      alert('Incident assigned successfully');
+      // Reset form
+      setSelectedGroup('');
+      setSelectedUserId('');
+    } catch (error: any) {
+      console.error('Error assigning incident:', error);
+      alert(error.response?.data?.message || 'Failed to assign incident');
+    } finally {
+      setAssigning(false);
     }
   };
 
@@ -189,12 +307,70 @@ const IncidentDetailsPage = () => {
               value={incident.status}
               onChange={(e) => handleStatusChange(e.target.value)}
             >
-              <option value={IncidentStatus.Open}>Open</option>
+              <option value={IncidentStatus.Pending}>Pending</option>
               <option value={IncidentStatus.Assigned}>Assigned</option>
               <option value={IncidentStatus.InProgress}>In Progress</option>
+              <option value={IncidentStatus.OnHold}>On Hold</option>
               <option value={IncidentStatus.Resolved}>Resolved</option>
-              <option value={IncidentStatus.Closed}>Closed</option>
+              <option value={IncidentStatus.Cancelled}>Cancelled</option>
             </select>
+          </div>
+
+          {/* Assignment */}
+          <div className="bg-white shadow rounded-lg p-6">
+            <h3 className="text-sm font-medium text-gray-500 mb-4">Assignment</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Assigned Group *
+                </label>
+                <select
+                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  value={selectedGroup}
+                  onChange={(e) => setSelectedGroup(e.target.value)}
+                >
+                  <option value="">Select a group...</option>
+                  {teams.map((team) => (
+                    <option key={team} value={team}>
+                      {team}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Assigned To (Optional)
+                </label>
+                <select
+                  className="block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  value={selectedUserId}
+                  onChange={(e) => setSelectedUserId(e.target.value)}
+                  disabled={!selectedGroup || groupUsers.length === 0}
+                >
+                  <option value="">
+                    {!selectedGroup
+                      ? 'Select a group first...'
+                      : groupUsers.length === 0
+                      ? 'No users in this group'
+                      : 'Assign to group only'}
+                  </option>
+                  {groupUsers.map((user) => (
+                    <option key={user.id} value={user.id}>
+                      {user.fullName} ({user.username})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <button
+                onClick={handleAssignment}
+                disabled={!selectedGroup || assigning}
+                className="w-full px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {assigning ? 'Assigning...' : 'Assign Incident'}
+              </button>
+            </div>
           </div>
 
           {/* Details */}
@@ -205,12 +381,24 @@ const IncidentDetailsPage = () => {
                 <dt className="text-xs font-medium text-gray-500">Service</dt>
                 <dd className="mt-1 text-sm text-gray-900">{incident.serviceName}</dd>
               </div>
+              {incident.assignedGroup && (
+                <div>
+                  <dt className="text-xs font-medium text-gray-500">Assigned Group</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{incident.assignedGroup}</dd>
+                </div>
+              )}
               <div>
                 <dt className="text-xs font-medium text-gray-500">Assigned To</dt>
                 <dd className="mt-1 text-sm text-gray-900">
                   {incident.assignedToUserName || 'Unassigned'}
                 </dd>
               </div>
+              {incident.assignedByUserName && (
+                <div>
+                  <dt className="text-xs font-medium text-gray-500">Assigned By</dt>
+                  <dd className="mt-1 text-sm text-gray-900">{incident.assignedByUserName}</dd>
+                </div>
+              )}
               <div>
                 <dt className="text-xs font-medium text-gray-500">Created By</dt>
                 <dd className="mt-1 text-sm text-gray-900">{incident.createdByUserName}</dd>
@@ -231,6 +419,22 @@ const IncidentDetailsPage = () => {
               )}
             </dl>
           </div>
+
+          {/* Resolution Note */}
+          {incident.resolutionNote && (
+            <div className="bg-white shadow rounded-lg p-6">
+              <h3 className="text-sm font-medium text-gray-500 mb-2">Resolution Note</h3>
+              <p className="text-sm text-gray-900 whitespace-pre-wrap">{incident.resolutionNote}</p>
+            </div>
+          )}
+
+          {/* On Hold Reason */}
+          {incident.onHoldReason && (
+            <div className="bg-white shadow rounded-lg p-6">
+              <h3 className="text-sm font-medium text-gray-500 mb-2">On Hold Reason</h3>
+              <p className="text-sm text-gray-900 whitespace-pre-wrap">{incident.onHoldReason}</p>
+            </div>
+          )}
 
           {/* SLA Info */}
           <div className="bg-white shadow rounded-lg p-6">
@@ -258,6 +462,90 @@ const IncidentDetailsPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Resolve/Cancel Modal */}
+      {showResolveModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                {pendingStatus === IncidentStatus.Resolved ? 'Resolve' : 'Cancel'} Incident
+              </h3>
+              <div className="mt-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Resolution Note *
+                </label>
+                <textarea
+                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  rows={4}
+                  placeholder="Describe how this incident was resolved..."
+                  value={resolutionNote}
+                  onChange={(e) => setResolutionNote(e.target.value)}
+                />
+              </div>
+              <div className="mt-4 flex justify-end space-x-3">
+                <button
+                  onClick={() => {
+                    setShowResolveModal(false);
+                    setResolutionNote('');
+                    setPendingStatus('');
+                  }}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleResolveSubmit}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                >
+                  {pendingStatus === IncidentStatus.Resolved ? 'Resolve' : 'Cancel'} Incident
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* On Hold Modal */}
+      {showHoldModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Put Incident On Hold</h3>
+              <div className="mt-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Hold Reason *
+                </label>
+                <textarea
+                  className="w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  rows={4}
+                  placeholder="Explain why this incident is being put on hold..."
+                  value={holdReason}
+                  onChange={(e) => setHoldReason(e.target.value)}
+                />
+              </div>
+              <div className="mt-4 flex justify-end space-x-3">
+                <button
+                  onClick={() => {
+                    setShowHoldModal(false);
+                    setHoldReason('');
+                    setPendingStatus('');
+                  }}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleHoldSubmit}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                >
+                  Put On Hold
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

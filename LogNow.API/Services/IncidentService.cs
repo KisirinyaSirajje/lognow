@@ -145,24 +145,62 @@ public class IncidentService : IIncidentService
             throw new KeyNotFoundException($"Incident with ID {id} not found");
         }
 
-        var assignedUser = await _userRepository.GetByIdAsync(assignIncidentDto.UserId);
-        if (assignedUser == null)
+        var timelineMessage = "";
+
+        // Assign to group
+        if (!string.IsNullOrWhiteSpace(assignIncidentDto.AssignedGroup))
         {
-            throw new KeyNotFoundException($"User with ID {assignIncidentDto.UserId} not found");
+            incident.AssignedGroup = assignIncidentDto.AssignedGroup;
+            timelineMessage = $"Incident assigned to group: {assignIncidentDto.AssignedGroup}";
+            
+            // If no user specified yet, set status to Assigned
+            if (!assignIncidentDto.UserId.HasValue)
+            {
+                incident.Status = IncidentStatus.Assigned;
+            }
         }
 
-        incident.AssignedToUserId = assignIncidentDto.UserId;
-        incident.AssignedByUserId = userId;
-        incident.Status = IncidentStatus.Assigned;
+        // Assign to specific user
+        if (assignIncidentDto.UserId.HasValue)
+        {
+            var assignedUser = await _userRepository.GetByIdAsync(assignIncidentDto.UserId.Value);
+            if (assignedUser == null)
+            {
+                throw new KeyNotFoundException($"User with ID {assignIncidentDto.UserId} not found");
+            }
+
+            // If group is assigned, validate user is in that group
+            if (!string.IsNullOrWhiteSpace(incident.AssignedGroup) && 
+                assignedUser.Team != incident.AssignedGroup)
+            {
+                throw new ArgumentException($"User {assignedUser.FullName} is not in the assigned group {incident.AssignedGroup}");
+            }
+
+            incident.AssignedToUserId = assignIncidentDto.UserId.Value;
+            incident.AssignedByUserId = userId;
+            incident.Status = IncidentStatus.Assigned;
+            
+            if (string.IsNullOrWhiteSpace(timelineMessage))
+            {
+                timelineMessage = $"Incident assigned to {assignedUser.FullName}";
+            }
+            else
+            {
+                timelineMessage += $" and user {assignedUser.FullName}";
+            }
+        }
 
         await _incidentRepository.UpdateAsync(incident);
 
-        await _timelineService.AddTimelineEntryAsync(
-            incident.Id,
-            ActionType.Assigned,
-            $"Incident assigned to {assignedUser.FullName}",
-            userId
-        );
+        if (!string.IsNullOrWhiteSpace(timelineMessage))
+        {
+            await _timelineService.AddTimelineEntryAsync(
+                incident.Id,
+                ActionType.Assigned,
+                timelineMessage,
+                userId
+            );
+        }
 
         // Reload to get updated navigation properties
         incident = await _incidentRepository.GetByIdAsync(id);
@@ -251,6 +289,7 @@ public class IncidentService : IIncidentService
             ServiceName = incident.Service?.Name ?? string.Empty,
             Severity = incident.Severity.ToString(),
             Status = incident.Status.ToString(),
+            AssignedGroup = incident.AssignedGroup,
             AssignedToUserId = incident.AssignedToUserId,
             AssignedToUserName = incident.AssignedToUser?.FullName,
             AssignedByUserId = incident.AssignedByUserId,

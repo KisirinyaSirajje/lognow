@@ -61,13 +61,18 @@ export interface Incident {
   serviceName: string;
   severity: Severity;
   status: IncidentStatus;
+  assignedGroup?: string;
   assignedToUserId?: string;
   assignedToUserName?: string;
+  assignedByUserId?: string;
+  assignedByUserName?: string;
   createdByUserId: string;
   createdByUserName: string;
   createdAt: string;
   updatedAt?: string;
   resolvedAt?: string;
+  resolutionNote?: string;
+  onHoldReason?: string;
   responseDueAt?: string;
   resolutionDueAt?: string;
   isResponseBreached: boolean;
@@ -82,11 +87,12 @@ export enum Severity {
 }
 
 export enum IncidentStatus {
-  Open = 'Open',
+  Pending = 'Pending',
   Assigned = 'Assigned',
   InProgress = 'InProgress',
+  OnHold = 'OnHold',
   Resolved = 'Resolved',
-  Closed = 'Closed',
+  Cancelled = 'Cancelled',
 }
 
 export interface CreateIncidentDto {
@@ -101,7 +107,19 @@ export interface UpdateIncidentDto {
   description?: string;
   severity?: string;
   status?: string;
+  assignedGroup?: string;
   assignedToUserId?: string;
+}
+
+export interface AssignIncidentDto {
+  assignedGroup?: string;
+  userId?: string;
+}
+
+export interface UpdateIncidentStatusDto {
+  status: string;
+  resolutionNote?: string;
+  onHoldReason?: string;
 }
 
 export interface IncidentComment {

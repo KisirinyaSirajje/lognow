@@ -25,9 +25,9 @@ const IncidentsPage = () => {
 
   const filteredIncidents = incidents.filter((incident) => {
     if (filter === 'all') return true;
-    if (filter === 'open') return incident.status === 'Open';
+    if (filter === 'pending') return incident.status === 'Pending';
     if (filter === 'inprogress') return incident.status === 'InProgress' || incident.status === 'Assigned';
-    if (filter === 'resolved') return incident.status === 'Resolved' || incident.status === 'Closed';
+    if (filter === 'resolved') return incident.status === 'Resolved' || incident.status === 'Cancelled';
     return true;
   });
 
@@ -63,14 +63,14 @@ const IncidentsPage = () => {
           All ({incidents.length})
         </button>
         <button
-          onClick={() => setFilter('open')}
+          onClick={() => setFilter('pending')}
           className={`px-4 py-2 text-sm font-medium rounded-md ${
-            filter === 'open'
+            filter === 'pending'
               ? 'bg-blue-600 text-white'
               : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
           }`}
         >
-          Open ({incidents.filter((i) => i.status === 'Open').length})
+          Pending ({incidents.filter((i) => i.status === 'Pending').length})
         </button>
         <button
           onClick={() => setFilter('inprogress')}
@@ -90,7 +90,7 @@ const IncidentsPage = () => {
               : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
           }`}
         >
-          Resolved ({incidents.filter((i) => i.status === 'Resolved' || i.status === 'Closed').length})
+          Resolved ({incidents.filter((i) => i.status === 'Resolved' || i.status === 'Cancelled').length})
         </button>
       </div>
 
@@ -149,9 +149,11 @@ const IncidentsPage = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      incident.status === 'Open' ? 'bg-red-100 text-red-800' :
+                      incident.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
                       incident.status === 'Assigned' || incident.status === 'InProgress' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-green-100 text-green-800'
+                      incident.status === 'OnHold' ? 'bg-purple-100 text-purple-800' :
+                      incident.status === 'Resolved' ? 'bg-green-100 text-green-800' :
+                      'bg-red-100 text-red-800'
                     }`}>
                       {incident.status}
                     </span>

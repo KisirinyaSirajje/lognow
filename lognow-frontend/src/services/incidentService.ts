@@ -1,9 +1,14 @@
 import api from './api';
-import { Incident, CreateIncidentDto, UpdateIncidentDto } from '../types';
+import { Incident, CreateIncidentDto, UpdateIncidentDto, AssignIncidentDto, UpdateIncidentStatusDto } from '../types';
 
 export const incidentService = {
   async getAll(): Promise<Incident[]> {
     const response = await api.get<Incident[]>('/incidents');
+    return response.data;
+  },
+
+  async getByGroup(group: string): Promise<Incident[]> {
+    const response = await api.get<Incident[]>(`/incidents/group/${group}`);
     return response.data;
   },
 
@@ -22,13 +27,13 @@ export const incidentService = {
     return response.data;
   },
 
-  async assign(id: string, userId: string): Promise<Incident> {
-    const response = await api.put<Incident>(`/incidents/${id}/assign`, { userId });
+  async assign(id: string, data: AssignIncidentDto): Promise<Incident> {
+    const response = await api.put<Incident>(`/incidents/${id}/assign`, data);
     return response.data;
   },
 
-  async updateStatus(id: string, status: string): Promise<Incident> {
-    const response = await api.put<Incident>(`/incidents/${id}/status`, { status });
+  async updateStatus(id: string, data: UpdateIncidentStatusDto): Promise<Incident> {
+    const response = await api.put<Incident>(`/incidents/${id}/status`, data);
     return response.data;
   },
 

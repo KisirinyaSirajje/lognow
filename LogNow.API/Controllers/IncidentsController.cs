@@ -42,6 +42,22 @@ public class IncidentsController : ControllerBase
         }
     }
 
+    [HttpGet("group/{group}")]
+    public async Task<ActionResult<IEnumerable<IncidentDto>>> GetByGroup(string group)
+    {
+        try
+        {
+            var incidents = await _incidentService.GetAllIncidentsAsync();
+            var filteredIncidents = incidents.Where(i => i.AssignedGroup == group);
+            return Ok(filteredIncidents);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting incidents for group {Group}", group);
+            return StatusCode(500, new { message = "An error occurred while retrieving incidents" });
+        }
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<IncidentDto>> GetById(Guid id)
     {
@@ -110,7 +126,7 @@ public class IncidentsController : ControllerBase
     }
 
     [HttpPut("{id}/assign")]
-    [Authorize(Roles = "Admin,TeamLead")]
+    [Authorize(Roles = "Admin,TeamLead,Engineer")]
     public async Task<ActionResult<IncidentDto>> Assign(Guid id, [FromBody] AssignIncidentDto assignIncidentDto)
     {
         try
