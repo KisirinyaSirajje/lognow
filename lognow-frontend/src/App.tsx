@@ -7,6 +7,9 @@ import DashboardPage from './pages/DashboardPage';
 import IncidentsPage from './pages/IncidentsPage';
 import IncidentDetailsPage from './pages/IncidentDetailsPage';
 import CreateIncidentPage from './pages/CreateIncidentPage';
+import WorkOrdersPage from './pages/WorkOrdersPage';
+import WorkOrderDetailsPage from './pages/WorkOrderDetailsPage';
+import CreateWorkOrderPage from './pages/CreateWorkOrderPage';
 import ServicesPage from './pages/ServicesPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
@@ -27,6 +30,9 @@ function App() {
               <Route path="/incidents" element={<IncidentsPage />} />
               <Route path="/incidents/new" element={<CreateIncidentPage />} />
               <Route path="/incidents/:id" element={<IncidentDetailsPage />} />
+              <Route path="/work-orders" element={<WorkOrdersPage />} />
+              <Route path="/work-orders/new" element={<CreateWorkOrderPage />} />
+              <Route path="/work-orders/:id" element={<WorkOrderDetailsPage />} />
               <Route path="/services" element={<ServicesPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/admin" element={<AdminDashboardPage />} />

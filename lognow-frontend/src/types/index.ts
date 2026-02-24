@@ -177,3 +177,114 @@ export interface AdminStats {
   usersByRole: Record<string, number>;
   incidentsByStatus: Record<string, number>;
 }
+
+export interface WorkOrder {
+  id: string;
+  workOrderNumber: string;
+  title: string;
+  description: string;
+  type: WorkOrderType;
+  priority: WorkOrderPriority;
+  status: WorkOrderStatus;
+  serviceId?: string;
+  serviceName?: string;
+  incidentId?: string;
+  incidentNumber?: string;
+  assignedToUserId?: string;
+  assignedToUserName?: string;
+  assignedGroup?: string;
+  createdByUserId: string;
+  createdByUserName: string;
+  scheduledStartDate?: string;
+  scheduledEndDate?: string;
+  actualStartDate?: string;
+  actualEndDate?: string;
+  estimatedCost?: number;
+  actualCost?: number;
+  estimatedHours?: number;
+  actualHours?: number;
+  location?: string;
+  partsRequired?: string;
+  completionNotes?: string;
+  createdAt: string;
+  updatedAt?: string;
+  completedAt?: string;
+}
+
+export enum WorkOrderType {
+  Corrective = 'Corrective',
+  Preventive = 'Preventive',
+  Inspection = 'Inspection',
+  Installation = 'Installation',
+  Upgrade = 'Upgrade',
+  Emergency = 'Emergency',
+}
+
+export enum WorkOrderPriority {
+  Low = 'Low',
+  Medium = 'Medium',
+  High = 'High',
+  Critical = 'Critical',
+}
+
+export enum WorkOrderStatus {
+  Draft = 'Draft',
+  Scheduled = 'Scheduled',
+  Assigned = 'Assigned',
+  InProgress = 'InProgress',
+  OnHold = 'OnHold',
+  Completed = 'Completed',
+  Verified = 'Verified',
+  Cancelled = 'Cancelled',
+}
+
+export interface CreateWorkOrderDto {
+  title: string;
+  description: string;
+  type: string;
+  priority: string;
+  serviceId?: string;
+  incidentId?: string;
+  location?: string;
+  scheduledStartDate?: string;
+  scheduledEndDate?: string;
+  estimatedCost?: number;
+  estimatedHours?: number;
+  partsRequired?: string;
+}
+
+export interface UpdateWorkOrderDto {
+  title?: string;
+  description?: string;
+  priority?: string;
+  status?: string;
+  assignedToUserId?: string;
+  assignedGroup?: string;
+  scheduledStartDate?: string;
+  scheduledEndDate?: string;
+  actualStartDate?: string;
+  actualEndDate?: string;
+  actualCost?: number;
+  actualHours?: number;
+  location?: string;
+  partsRequired?: string;
+  completionNotes?: string;
+}
+
+export interface AssignWorkOrderDto {
+  assignedGroup?: string;
+  userId?: string;
+}
+
+export interface WorkOrderNote {
+  id: string;
+  workOrderId: string;
+  userId: string;
+  userName: string;
+  commentText: string;
+  createdAt: string;
+}
+
+export interface CreateWorkOrderNoteDto {
+  commentText: string;
+}

@@ -31,9 +31,9 @@ const DashboardPage = () => {
   }
 
   return (
-    <div className="px-4 py-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+    <div>
+      <div className="mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
         <p className="mt-1 text-sm text-gray-500">Welcome to Log Now Incident Management</p>
       </div>
 
@@ -124,8 +124,8 @@ const DashboardPage = () => {
 
       {/* Recent Incidents */}
       <div className="bg-white shadow rounded-lg overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-          <h3 className="text-lg font-medium text-gray-900">Recent Incidents</h3>
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+          <h3 className="text-base sm:text-lg font-medium text-gray-900">Recent Incidents</h3>
           <Link to="/incidents" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
             View All
           </Link>
@@ -134,19 +134,19 @@ const DashboardPage = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Incident #
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Title
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Severity
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Service
                 </th>
               </tr>
@@ -154,15 +154,15 @@ const DashboardPage = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {dashboard.recentIncidents.map((incident) => (
                 <tr key={incident.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <Link to={`/incidents/${incident.id}`} className="text-blue-600 hover:text-blue-800">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                    <Link to={`/incidents/${incident.id}`} className="text-blue-600 hover:text-blue-800 text-sm">
                       {incident.incidentNumber}
                     </Link>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">{incident.title}</div>
+                  <td className="px-3 sm:px-6 py-4">
+                    <div className="text-sm text-gray-900 truncate max-w-[150px] sm:max-w-none">{incident.title}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                       incident.severity === 'SEV1' ? 'bg-red-100 text-red-800' :
                       incident.severity === 'SEV2' ? 'bg-orange-100 text-orange-800' :
@@ -172,7 +172,7 @@ const DashboardPage = () => {
                       {incident.severity}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                       incident.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
                       incident.status === 'Assigned' || incident.status === 'InProgress' ? 'bg-yellow-100 text-yellow-800' :
@@ -183,7 +183,7 @@ const DashboardPage = () => {
                       {incident.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="hidden sm:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {incident.serviceName}
                   </td>
                 </tr>

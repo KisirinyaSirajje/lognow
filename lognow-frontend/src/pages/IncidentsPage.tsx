@@ -36,25 +36,25 @@ const IncidentsPage = () => {
   }
 
   return (
-    <div className="px-4 py-6">
-      <div className="mb-6 flex justify-between items-center">
+    <div>
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Incidents</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Incidents</h1>
           <p className="mt-1 text-sm text-gray-500">Manage all service incidents</p>
         </div>
         <Link
           to="/incidents/new"
-          className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+          className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 text-center"
         >
           Create Incident
         </Link>
       </div>
 
       {/* Filters */}
-      <div className="mb-6 flex space-x-4">
+      <div className="mb-4 sm:mb-6 flex flex-wrap gap-2">
         <button
           onClick={() => setFilter('all')}
-          className={`px-4 py-2 text-sm font-medium rounded-md ${
+          className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md ${
             filter === 'all'
               ? 'bg-blue-600 text-white'
               : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
@@ -64,7 +64,7 @@ const IncidentsPage = () => {
         </button>
         <button
           onClick={() => setFilter('pending')}
-          className={`px-4 py-2 text-sm font-medium rounded-md ${
+          className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md ${
             filter === 'pending'
               ? 'bg-blue-600 text-white'
               : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
@@ -74,7 +74,7 @@ const IncidentsPage = () => {
         </button>
         <button
           onClick={() => setFilter('inprogress')}
-          className={`px-4 py-2 text-sm font-medium rounded-md ${
+          className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md ${
             filter === 'inprogress'
               ? 'bg-blue-600 text-white'
               : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
@@ -84,7 +84,7 @@ const IncidentsPage = () => {
         </button>
         <button
           onClick={() => setFilter('resolved')}
-          className={`px-4 py-2 text-sm font-medium rounded-md ${
+          className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-md ${
             filter === 'resolved'
               ? 'bg-blue-600 text-white'
               : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-300'
@@ -100,25 +100,25 @@ const IncidentsPage = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Incident #
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Title
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Service
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Severity
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="hidden lg:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Assigned To
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="hidden sm:table-cell px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Created
                 </th>
               </tr>
@@ -126,18 +126,18 @@ const IncidentsPage = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredIncidents.map((incident) => (
                 <tr key={incident.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <Link to={`/incidents/${incident.id}`} className="text-blue-600 hover:text-blue-800 font-medium">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                    <Link to={`/incidents/${incident.id}`} className="text-blue-600 hover:text-blue-800 font-medium text-sm">
                       {incident.incidentNumber}
                     </Link>
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">{incident.title}</div>
+                  <td className="px-3 sm:px-6 py-4">
+                    <div className="text-sm text-gray-900 truncate max-w-[150px] sm:max-w-[200px] md:max-w-none">{incident.title}</div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="hidden md:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {incident.serviceName}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                       incident.severity === 'SEV1' ? 'bg-red-100 text-red-800' :
                       incident.severity === 'SEV2' ? 'bg-orange-100 text-orange-800' :
@@ -147,7 +147,7 @@ const IncidentsPage = () => {
                       {incident.severity}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                       incident.status === 'Pending' ? 'bg-gray-100 text-gray-800' :
                       incident.status === 'Assigned' || incident.status === 'InProgress' ? 'bg-yellow-100 text-yellow-800' :
@@ -158,10 +158,10 @@ const IncidentsPage = () => {
                       {incident.status}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="hidden lg:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {incident.assignedToUserName || 'Unassigned'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td className="hidden sm:table-cell px-3 sm:px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(incident.createdAt).toLocaleDateString()}
                   </td>
                 </tr>

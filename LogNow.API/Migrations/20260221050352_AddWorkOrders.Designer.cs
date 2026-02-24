@@ -3,6 +3,7 @@ using System;
 using LogNow.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LogNow.API.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260221050352_AddWorkOrders")]
+    partial class AddWorkOrders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.0");
@@ -227,32 +230,32 @@ namespace LogNow.API.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("dcd6a24b-c47e-4c47-b549-bbca7a4f27ca"),
-                            CreatedAt = new DateTime(2026, 2, 21, 6, 3, 54, 17, DateTimeKind.Utc).AddTicks(9454),
+                            Id = new Guid("c5ababa9-db04-474a-a119-7d7d82c17702"),
+                            CreatedAt = new DateTime(2026, 2, 21, 5, 3, 52, 259, DateTimeKind.Utc).AddTicks(2621),
                             ResolutionTimeMinutes = 30,
                             ResponseTimeMinutes = 5,
                             Severity = "SEV1"
                         },
                         new
                         {
-                            Id = new Guid("fc6cfce8-39cf-4c0a-9c36-73feef2fd621"),
-                            CreatedAt = new DateTime(2026, 2, 21, 6, 3, 54, 17, DateTimeKind.Utc).AddTicks(9716),
+                            Id = new Guid("a89afe8e-dae6-4415-88fa-5e4eeb4e5869"),
+                            CreatedAt = new DateTime(2026, 2, 21, 5, 3, 52, 259, DateTimeKind.Utc).AddTicks(2655),
                             ResolutionTimeMinutes = 120,
                             ResponseTimeMinutes = 15,
                             Severity = "SEV2"
                         },
                         new
                         {
-                            Id = new Guid("9fe062a3-67c1-4fda-bab6-90296e2ce913"),
-                            CreatedAt = new DateTime(2026, 2, 21, 6, 3, 54, 17, DateTimeKind.Utc).AddTicks(9753),
+                            Id = new Guid("d082c02c-f24c-4280-94e1-96cbe3b924f6"),
+                            CreatedAt = new DateTime(2026, 2, 21, 5, 3, 52, 259, DateTimeKind.Utc).AddTicks(2657),
                             ResolutionTimeMinutes = 1440,
                             ResponseTimeMinutes = 60,
                             Severity = "SEV3"
                         },
                         new
                         {
-                            Id = new Guid("8a070d3f-3fe6-4069-ae3f-9ddbe9a74c19"),
-                            CreatedAt = new DateTime(2026, 2, 21, 6, 3, 54, 17, DateTimeKind.Utc).AddTicks(9783),
+                            Id = new Guid("f36c95f0-67f6-475a-b52f-783a2be6a4bc"),
+                            CreatedAt = new DateTime(2026, 2, 21, 5, 3, 52, 259, DateTimeKind.Utc).AddTicks(2659),
                             ResolutionTimeMinutes = 4320,
                             ResponseTimeMinutes = 240,
                             Severity = "SEV4"
@@ -444,34 +447,6 @@ namespace LogNow.API.Migrations
                     b.ToTable("WorkOrders");
                 });
 
-            modelBuilder.Entity("LogNow.API.Models.WorkOrderComment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CommentText")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("WorkOrderId")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("WorkOrderId");
-
-                    b.ToTable("WorkOrderComments");
-                });
-
             modelBuilder.Entity("LogNow.API.Models.Incident", b =>
                 {
                     b.HasOne("LogNow.API.Models.User", "AssignedByUser")
@@ -585,25 +560,6 @@ namespace LogNow.API.Migrations
                     b.Navigation("Service");
                 });
 
-            modelBuilder.Entity("LogNow.API.Models.WorkOrderComment", b =>
-                {
-                    b.HasOne("LogNow.API.Models.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("LogNow.API.Models.WorkOrder", "WorkOrder")
-                        .WithMany("Comments")
-                        .HasForeignKey("WorkOrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-
-                    b.Navigation("WorkOrder");
-                });
-
             modelBuilder.Entity("LogNow.API.Models.Incident", b =>
                 {
                     b.Navigation("Comments");
@@ -625,11 +581,6 @@ namespace LogNow.API.Migrations
                     b.Navigation("CreatedIncidents");
 
                     b.Navigation("TimelineActions");
-                });
-
-            modelBuilder.Entity("LogNow.API.Models.WorkOrder", b =>
-                {
-                    b.Navigation("Comments");
                 });
 #pragma warning restore 612, 618
         }

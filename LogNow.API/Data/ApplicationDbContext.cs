@@ -16,6 +16,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<IncidentTimeline> IncidentTimelines { get; set; }
     public DbSet<SLA> SLAs { get; set; }
     public DbSet<Notification> Notifications { get; set; }
+    public DbSet<WorkOrder> WorkOrders { get; set; }
+    public DbSet<WorkOrderComment> WorkOrderComments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -117,6 +119,52 @@ public class ApplicationDbContext : DbContext
                 .HasForeignKey(e => e.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
             entity.HasIndex(e => new { e.UserId, e.IsRead });
+        });
+
+        // WorkOrder configuration
+        modelBuilder.Entity<WorkOrder>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.WorkOrderNumber).IsUnique();
+            entity.Property(e => e.Type).HasConversion<string>();
+            entity.Property(e => e.Priority).HasConversion<string>();
+            entity.Property(e => e.Status).HasConversion<string>();
+            
+            entity.HasOne(e => e.Service)
+                .WithMany()
+                .HasForeignKey(e => e.ServiceId)
+                .OnDelete(DeleteBehavior.SetNull);
+            
+            entity.HasOne(e => e.Incident)
+                .WithMany()
+                .HasForeignKey(e => e.IncidentId)
+                .OnDelete(DeleteBehavior.SetNull);
+            
+            entity.HasOne(e => e.AssignedToUser)
+                .WithMany()
+                .HasForeignKey(e => e.AssignedToUserId)
+                .OnDelete(DeleteBehavior.SetNull);
+            
+            entity.HasOne(e => e.CreatedByUser)
+                .WithMany()
+                .HasForeignKey(e => e.CreatedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // WorkOrderComment configuration
+        modelBuilder.Entity<WorkOrderComment>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.HasOne(e => e.WorkOrder)
+                .WithMany(w => w.Comments)
+                .HasForeignKey(e => e.WorkOrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         // Seed default SLAs
